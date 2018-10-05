@@ -15,7 +15,7 @@ case class Ship(num: Int, size: Int, cells: List[Cell], sunk: Boolean = false){
 
 object Ship{
 
-    def getPosition(posX: Int, posY: Int, orientation: String, size: Int, listCells: List[Cell]): List[Cell] = {
+    def createShip(posX: Int, posY: Int, orientation: String, size: Int, listCells: List[Cell]): List[Cell] = {
 
         if (size==0){
             listCells
@@ -26,28 +26,35 @@ object Ship{
             case "L" => {
                 val newCell: Cell = new Cell(posX, posY)
                 val newListCells: List[Cell] = newCell :: listCells
-                getPosition(posX-1, posY, "L", size-1, newListCells)
+                createShip(posX-1, posY, "L", size-1, newListCells)
 
             }
             case "R" => {
                 val newCell: Cell = new Cell(posX, posY)
                 val newListCells: List[Cell] = newCell :: listCells
-                getPosition(posX+1, posY, "R", size-1, newListCells)
+                createShip(posX+1, posY, "R", size-1, newListCells)
 
             }
             case "U" => {
                 val newCell: Cell = new Cell(posX, posY)
                 val newListCells: List[Cell] = newCell :: listCells
-                getPosition(posX, posY-1, "U", size-1, newListCells)
+                createShip(posX, posY-1, "U", size-1, newListCells)
 
             }
             case "D" => {
                 val newCell: Cell = new Cell(posX, posY)
                 val newListCells: List[Cell] = newCell :: listCells
-                getPosition(posX, posY+1, "D", size-1, newListCells)
+                createShip(posX, posY+1, "D", size-1, newListCells)
 
+            }
+            case _ => {
+                println("Please chose a correct orientation\n")
+                createShip(posX, posY, orientation, size, listCells)
             }
         }
     }
     }
+
+    def checkIfInShip(cell: Cell, ship: Ship): Boolean = ship.getCells().contains(cell)
+
 }
