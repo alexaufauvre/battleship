@@ -53,25 +53,25 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
     //Render the board containing our fleet
     def renderOwnBoard(x: Int, y: Int, boardSize: Int, fleet: List[Ship], ownBoardHit: List[Cell]): Unit = {
 
-        // Numbers on top
-        if (x < boardSize && y == boardSize+1){
-            print("  " + x + "  ")
+        // Numbers on bottom
+        if (x < boardSize+1 && y == boardSize+1){
+            print("  " + x + " ")
             renderOwnBoard(x+1, y, boardSize, fleet, ownBoardHit)
         }
 
         //Numbers on right
-        else if(x >= boardSize && y > 0 && y < boardSize+1){
+        else if(x > boardSize && y < boardSize+1){
             println("| " + y)
             renderOwnBoard(1, y+1, boardSize, fleet, ownBoardHit)
         }
 
-        //
+        //New row
         else if(x == boardSize+1 && y == boardSize+1){
             println()
             renderOwnBoard(1, y+1, boardSize, fleet, ownBoardHit)
         }
 
-        else if(x <= boardSize && y > 0){
+        else if(x <= boardSize && y < boardSize+1){
             val currentCell: Cell = new Cell(x, y)
             val fleetCells: List[Cell] = getFleetCells(fleet)
             if (fleetCells.contains(currentCell)) {
@@ -81,7 +81,8 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
 
             renderOwnBoard(x+1, y, boardSize, fleet, ownBoardHit)
 
-            /*//Check if the cell is in a ship. True: print the ship's number. False: print a blank cell.
+            /*
+            //Check if the cell is in a ship. True: print the ship's number. False: print a blank cell.
             var isInShip: Boolean = false
             fleet.foreach{ship=>
                 if (Ship.checkIfInShip(cell, ship)){
