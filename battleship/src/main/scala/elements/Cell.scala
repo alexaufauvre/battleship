@@ -14,6 +14,11 @@ case class Cell(posX: Int, posY: Int, touched: Boolean = false){
     //
     // }
 
+    //Checks if a cell belongs to a ship
+    def checkIfInShip(ship: Ship): Boolean = ship.getCells().contains(this)
+
+    def cellInBoard(boardSize: Int) = this.posX <= boardSize && 0 < this.posX && this.posY <= boardSize && 0 < this.posY
+
 
 
 }

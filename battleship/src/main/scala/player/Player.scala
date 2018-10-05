@@ -11,7 +11,7 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
     def getName(): String = "Player" + this.num
 
 
-    def addShips(fleet: List[Ship], numShip: Int, shipSize: Int): List[Ship] = {
+    def addShips(fleet: List[Ship], numShip: Int, shipSize: Int, boardSize: Int): List[Ship] = {
 
             if (numShip <= 5) {
 
@@ -28,17 +28,26 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
                 val orientation: String = GameUtils.getUserInput()
 
                 val listCells: List[Cell] = List[Cell]()
-                //Create the ship
-                val shipCells: List[Cell] = Ship.createShip(posX, posY, orientation, shipSize, listCells)
 
+                //Fill the ship
+                val shipCells: List[Cell] = Ship.fillShip(posX, posY, orientation, shipSize, listCells)
+
+                //Create the ship
                 val newShip: Ship = new Ship(numShip, shipSize, shipCells)
 
-                val newFleet: List[Ship] = newShip :: fleet
+                //If the ship is inside the board
+                if (newShip.shipInBoard(boardSize)){
+                    //Add the ship to the fleet
+                    val newFleet: List[Ship] = newShip :: fleet
+                    if (numShip == 3) addShips(newFleet, numShip+1, shipSize, boardSize)
 
-                if (numShip == 3) addShips(newFleet, numShip+1, shipSize)
+                    else addShips(newFleet, numShip+1, shipSize-1, boardSize)
+                }
 
-                else addShips(newFleet, numShip+1, shipSize-1)
-
+                else{
+                    print("Ship out of the board. Please enter valid values.")
+                    addShips(fleet, numShip, shipSize, boardSize)
+                }
 
         }
 
@@ -76,6 +85,9 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
             val fleetCells: List[Cell] = getFleetCells(fleet)
             if (fleetCells.contains(currentCell)) {
                 print("|_X_")
+            }
+            else if (ownBoardHit.contains(currentCell)) {
+                print("|_H_")
             }
             else print("|_ _")
 
