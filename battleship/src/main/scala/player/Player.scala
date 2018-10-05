@@ -36,17 +36,22 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
                 val newShip: Ship = new Ship(numShip, shipSize, shipCells)
 
                 //If the ship is inside the board
-                if (newShip.shipInBoard(boardSize)){
+                if (newShip.shipInBoard(boardSize) == false){
+                    print("Ship out of the board. Please enter valid values.")
+                    addShips(fleet, numShip, shipSize, boardSize)
+                }
+                else if(newShip.positionAvailable(fleet) == false){
+                    print("A ship is already at this position. Please enter valid values.")
+                    addShips(fleet, numShip, shipSize, boardSize)
+                }
+
+                else{
                     //Add the ship to the fleet
                     val newFleet: List[Ship] = newShip :: fleet
                     if (numShip == 3) addShips(newFleet, numShip+1, shipSize, boardSize)
 
                     else addShips(newFleet, numShip+1, shipSize-1, boardSize)
-                }
 
-                else{
-                    print("Ship out of the board. Please enter valid values.")
-                    addShips(fleet, numShip, shipSize, boardSize)
                 }
 
         }
@@ -56,8 +61,6 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
 
     } //end addShips
 
-    //Get all the cells of a fleet
-    def getFleetCells(fleet: List[Ship]): List[Cell] = fleet.flatMap(x => x.getCells())
 
     //Render the board containing our fleet
     def renderOwnBoard(x: Int, y: Int, boardSize: Int, fleet: List[Ship], ownBoardHit: List[Cell]): Unit = {
@@ -82,7 +85,7 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
 
         else if(x <= boardSize && y < boardSize+1){
             val currentCell: Cell = new Cell(x, y)
-            val fleetCells: List[Cell] = getFleetCells(fleet)
+            val fleetCells: List[Cell] = Player.getFleetCells(fleet)
             if (fleetCells.contains(currentCell)) {
                 print("|_X_")
             }
@@ -117,4 +120,9 @@ case class Player(num: Int, fleet: List[Ship], ownBoardHit: List[Cell], opponent
 
     }
 
+}
+
+object Player{
+    //Get all the cells of a fleet
+    def getFleetCells(fleet: List[Ship]): List[Cell] = fleet.flatMap(x => x.getCells())
 }

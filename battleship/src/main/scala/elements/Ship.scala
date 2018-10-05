@@ -14,6 +14,8 @@ case class Ship(num: Int, size: Int, cells: List[Cell], sunk: Boolean = false){
     // Check if the ship is inside the board
     def shipInBoard(boardSize: Int): Boolean = this.getCells().filter((cell) => cell.cellInBoard(boardSize)).length == this.getSize()
 
+    def positionAvailable(fleet: List[Ship]): Boolean = this.getCells().filter((cell) => Player.getFleetCells(fleet).contains(cell)).length == 0
+
 }
 
 object Ship{

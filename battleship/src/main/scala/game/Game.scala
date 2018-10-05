@@ -10,11 +10,13 @@ object Game extends App {
         val player2 = new Player(2, List(), List(), List())
 
 
+        // TO DO : Game settings //
+
         println("\nPlayer 1 \n")
-        val fleetPlayer1 = player1.addShips(List(),5,5,10)
+        val fleetPlayer1 = player1.addShips(List(),4,5,10)
         println("\nPlayer 2 \n")
-        //addShips(fleet, number of the first ship, size of the first ship)
-        val fleetPlayer2 = player2.addShips(List(),5,5,10)
+        //addShips(fleet, number of the first ship, size of the first ship, size of the board)
+        val fleetPlayer2 = player2.addShips(List(),4,5,10)
 
         val cell1: Cell = new Cell(3,4)
         val cell2: Cell = new Cell(2,2)
@@ -27,13 +29,10 @@ object Game extends App {
         print("\n")
         print("Player 2's Board : \n")
         player2.renderOwnBoard(1, 1, 10, fleetPlayer2, List())
-        print("\n In the board :" + cell1.cellInBoard(10))
-        print("\n In the board :" + cell3.cellInBoard(10))
-        print("\n In the board :" + ship1.shipInBoard(10))
-        print("\n In the board :" + ship2.shipInBoard(10))
-
-
-
+        // print("\n In the board :" + cell1.cellInBoard(10))
+        // print("\n In the board :" + cell3.cellInBoard(10))
+        // print("\n In the board :" + ship1.shipInBoard(10))
+        // print("\n In the board :" + ship2.shipInBoard(10))
 
 
         // // Return the num of the ship which contains the cell
@@ -46,11 +45,11 @@ object Game extends App {
         print("\n")
         // print("fleetPlayer2 : " + fleetPlayer2)
         // print("\n")
-        print("checkTrue : " + cell1.checkIfInShip(ship1))
-        print("\n")
-        print("checkFalse : " + cell2.checkIfInShip(ship1))
-        print("\n")
-        print("fleetCells : " + player1.getFleetCells(fleetPlayer1))
+        // print("checkTrue : " + cell1.checkIfInShip(ship1))
+        // print("\n")
+        // print("checkFalse : " + cell2.checkIfInShip(ship1))
+        // print("\n")
+        print("fleetCells : " + Player.getFleetCells(fleetPlayer1))
         // print("\n")
         // print("shipTest : " + shipTest)
 
