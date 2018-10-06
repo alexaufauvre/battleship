@@ -4,12 +4,12 @@ import scala.collection.immutable
 import elements._
 import game._
 
-case class Player(num: Int, fleet: List[Ship], hit: List[Cell], miss: List[Cell]){
+case class Player(num: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell]){
 
     def getNum(): Int = this.num
     def getFleet(): List[Ship] = this.fleet
     def getName(): String = "Player" + this.num
-    def getHit(): List[Cell] = this.hit
+    def getHits(): List[Cell] = this.hits
     def getMiss(): List[Cell] = this.miss
 
 
@@ -64,24 +64,24 @@ case class Player(num: Int, fleet: List[Ship], hit: List[Cell], miss: List[Cell]
     } //end addShips
 
     //Render the board containing our fleet
-    def renderBoard(x: Int, y: Int, boardSize: Int, fleet: List[Ship], hit: List[Cell], miss: List[Cell]): Unit = {
+    def renderBoard(x: Int, y: Int, boardSize: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell]): Unit = {
 
         // Numbers on bottom
         if (x < boardSize+1 && y == boardSize+1){
             print("  " + x + " ")
-            renderBoard(x+1, y, boardSize, fleet, hit, miss)
+            renderBoard(x+1, y, boardSize, fleet, hits, miss)
         }
 
         //Numbers on right
         else if(x > boardSize && y < boardSize+1){
             println("| " + y)
-            renderBoard(1, y+1, boardSize, fleet, hit, miss)
+            renderBoard(1, y+1, boardSize, fleet, hits, miss)
         }
 
         //New row
         else if(x == boardSize+1 && y == boardSize+1){
             println()
-            renderBoard(1, y+1, boardSize, fleet, hit, miss)
+            renderBoard(1, y+1, boardSize, fleet, hits, miss)
         }
 
         else if(x <= boardSize && y < boardSize+1){
@@ -90,15 +90,15 @@ case class Player(num: Int, fleet: List[Ship], hit: List[Cell], miss: List[Cell]
             if (fleetCells.contains(currentCell)) {
                 print("|_X_")
             }
-            else if (hit.contains(currentCell)) {
-                print("|_H_")
+            else if (hits.contains(currentCell)) {
+                print(Console.RED + "|_H_" + Console.RESET)
             }
             else if (miss.contains(currentCell)) {
-                print("|_O_")
+                print(Console.BLUE + "|_O_" + Console.RESET)
             }
             else print("|_ _")
 
-            renderBoard(x+1, y, boardSize, fleet, hit, miss)
+            renderBoard(x+1, y, boardSize, fleet, hits, miss)
 
             /*
             //Check if the cell is in a ship. True: print the ship's number. False: print a blank cell.
@@ -159,11 +159,9 @@ object Player{
             print("\nShip hit!\n")
 
             //Register the shot in the hit list
-            val newHit: List[Cell] = shotCell :: shooter.getHit()
+            val newHit: List[Cell] = shotCell :: shooter.getHits()
 
-            val shooterUpdated: Player = shooter.copy(hit=newHit)
-
-            // ship.createUpdatedShip(cellShot)
+            val shooterUpdated: Player = shooter.copy(hits=newHit)
 
             // Create a new ship with the hit cell updated
             // val updatedShip: Ship = ship.getCells().foreach((cell) => Cell.hitCell(shotCell, cell))
@@ -173,7 +171,9 @@ object Player{
             val updatedShip: Ship = ship.copy(cells=updatedCells)
 
             //Display a message if the ship is sunk
-            if (Ship.isSunk(updatedShip)) print("The ship " + updatedShip.getNum() + " is sunk!")
+            if (Ship.isSunk(updatedShip)) {
+                print("The ship " + updatedShip.getNum() + " is sunk!")
+            }
 
             // Create a temporary fleet without the old version of the ship
             val tempFleet: List[Ship] = fleetShot.filter(_.getNum() != ship.getNum())

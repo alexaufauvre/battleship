@@ -66,7 +66,7 @@ object Ship{
 
     def isSunk(ship: Ship): Boolean = {
         val shipCells: List[Cell] = ship.getCells()
-        if (shipCells.filter(_.touched == false) == 0){
+        if (shipCells.filter(_.isTouched() == false).length == 0){
             true
         }
         else false

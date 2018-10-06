@@ -38,21 +38,21 @@ object Game extends App {
         // Play one round in the game
         def playTurn(player1: Player, player2: Player): Unit = {
 
-            val hitP1: List[Cell] = player1.getHit()
+            val hitsP1: List[Cell] = player1.getHits()
             val missP1: List[Cell] = player1.getMiss()
-            val hitP2: List[Cell] = player2.getHit()
+            val hitsP2: List[Cell] = player2.getHits()
             val missP2: List[Cell] = player2.getMiss()
             val boardSize: Int = this.boardSize
             val fleetPlayer1: List[Ship] = player1.getFleet()
 
             // Render players' hit board
             print("Hit board : \n")
-            player1.renderBoard(1, 1, boardSize, List(), hitP1, missP1)
+            player1.renderBoard(1, 1, boardSize, List(), hitsP1, missP1)
             print("\n")
 
             // Render players' own board
             print("Your board : \n")
-            player1.renderBoard(1, 1, boardSize, fleetPlayer1, hitP2, missP2)
+            player1.renderBoard(1, 1, boardSize, fleetPlayer1, hitsP2, missP2)
             print("\n")
 
             // Player 1 shoot on Player 2
