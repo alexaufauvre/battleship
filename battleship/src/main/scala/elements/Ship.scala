@@ -4,17 +4,20 @@ import scala.collection.immutable
 import player._
 import game._
 
-case class Ship(num: Int, size: Int, cells: List[Cell], sunk: Boolean = false){
+case class Ship(num: Int, size: Int, cells: List[Cell]){
 
     def getNum(): Int = this.num
     def getSize(): Int = this.size
     def getCells(): List[Cell] = this.cells
-    def isSunk(): Boolean = this.sunk
 
+
+//TO DO : Split the big line into several lines in the check functions
     // Check if the ship is inside the board
     def shipInBoard(boardSize: Int): Boolean = this.getCells().filter((cell) => cell.cellInBoard(boardSize)).length == this.getSize()
 
+    // Check if there's already a ship in this position
     def positionAvailable(fleet: List[Ship]): Boolean = this.getCells().filter((cell) => Player.getFleetCells(fleet).contains(cell)).length == 0
+
 
 }
 
@@ -59,6 +62,14 @@ object Ship{
             // }
         }
     }
+    }
+
+    def isSunk(ship: Ship): Boolean = {
+        val shipCells: List[Cell] = ship.getCells()
+        if (shipCells.filter(_.touched == false) == 0){
+            true
+        }
+        else false
     }
 
 
