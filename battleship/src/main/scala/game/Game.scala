@@ -112,7 +112,9 @@ object Game extends App {
             val levelPlayer2: Int = player2.getAiLevel()
 
             // If there's at least one human player, the boards are displayed
-            if (levelPlayer1 == 0 || levelPlayer2 == 0){
+            if (levelPlayer1 == 0){
+
+                print("\n\n---------------\n\n" + player1.getName() + "'s turn\n\n")
                 // Render players' hit board
                 print("Hit board : \n")
                 player1.renderBoard(1, 1, boardSize, List(), hitsP1, missP1)

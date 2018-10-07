@@ -225,7 +225,7 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
 
             // If the last shot was a hit, the AI will try to shoot a cell next to this last shot
             if (hits.contains(lastShot) && availableNeighbours.isEmpty == false){
-                
+
                     // Chose a random cell among the available neighbours
                     val randomIndex: Int = Random.nextInt(availableNeighbours.length-1)+1
                     val cellShot: Cell = availableNeighbours(randomIndex).copy()
@@ -299,6 +299,8 @@ object Player{
                 return shoot(shooter, opponent)
             }
         }
+
+        println("\n" + shooter.getName() + " shot in (" + posX +", " + posY + ")\n")
 
         val shooterAfterShot: Player = shooter.copy(lastShot=lastShot)
 
