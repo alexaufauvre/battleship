@@ -17,6 +17,12 @@ case class Cell(posX: Int, posY: Int, touched: Boolean = false){
     // Checks if a cell belongs to the board
     def cellInBoard(boardSize: Int): Boolean = this.posX <= boardSize && 0 < this.posX && this.posY <= boardSize && 0 < this.posY
 
+    def getCellsNeighbours(boardCells: List[Cell]): List[Cell] = {
+        val neighboursVertical: List[Cell] = boardCells.filter((cell) => cell.getPosX() == this.getPosX()+1 ||  cell.getPosX() == this.getPosX()-1)
+        val neighboursHorizontal: List[Cell] = boardCells.filter((cell) => cell.getPosY() == this.getPosY()+1 ||  cell.getPosY() == this.getPosX()-1)
+        neighboursVertical ::: neighboursHorizontal
+
+    }
 
 }
 

@@ -6,7 +6,7 @@ import scala.util.Random
 import elements._
 import game._
 
-case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell]){
+case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell], wins: Int = 0){
 
     def getNum(): Int = this.num
     def getAiLevel(): Int = this.aiLevel
@@ -14,9 +14,10 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
     def getName(): String = "Player" + this.num
     def getHits(): List[Cell] = this.hits
     def getMiss(): List[Cell] = this.miss
+    def getWins(): Int = this.wins
 
 
-    def askShipPosition(aiLevel: Int, boardSize: Int, numShip: Int): (Int, Int, String) = {
+    def getShipPosition(aiLevel: Int, boardSize: Int, numShip: Int): (Int, Int, String) = {
 
         // If the player is human, ask for entering his fleet
         if (aiLevel == 0){
@@ -38,10 +39,10 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
         // If the player is an AI
         else {
             //Get X position for the initial cell of the ship
-            val posX: Int = Random.nextInt(boardSize)
+            val posX: Int = Random.nextInt(boardSize-1)+1
 
             //Get Y position for the initial cell of the ship
-            val posY: Int = Random.nextInt(boardSize)
+            val posY: Int = Random.nextInt(boardSize-1)+1
 
             //Get orientation of the ship
             val orientations: List[String] = List("L","R","U","D")
@@ -60,7 +61,7 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
 
             if (numShip <= 5) {
 
-                val shipPosition: (Int, Int, String) = askShipPosition(aiLevel, boardSize, numShip)
+                val shipPosition: (Int, Int, String) = getShipPosition(aiLevel, boardSize, numShip)
 
                 val posX: Int = shipPosition._1
                 val posY: Int = shipPosition._2
@@ -151,12 +152,86 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
         this.getHits().contains(shotCell) || this.getMiss().contains(shotCell)
     }
 
+    // Get the position of the shoot depending on the AI level
+    def getShootPosition(): (Int, Int) = {
+
+        val aiLevel: Int = this.aiLevel
+        val hits: List[Cell] = this.hits
+        val miss: List[Cell] = this.miss
+
+        // Human player
+        if (aiLevel == 0){
+            //Get X position for the cell to shoot
+            GameUtils.promptShootCell("posX")
+            val posX: Int = GameUtils.getUserInput().toInt
+
+            //Get Y position for the cell to shoot
+            GameUtils.promptShootCell("posY")
+            val posY: Int = GameUtils.getUserInput().toInt
+
+            return (posX, posY)
+        }
+
+        // Easy AI player
+        else if (aiLevel == 1){
+
+            val posX: Int = Random.nextInt(Game.boardSize-1)+1
+            val posY: Int = Random.nextInt(Game.boardSize-1)+1
+
+            return (posX, posY)
+
+        }
+
+        // Medium AI player
+        else if (aiLevel == 2){
+
+            val boardSize: Int = Game.boardSize
+
+            // Retrieve all the cells of the board
+            val boardCells: List[Cell] = Game.getBoardCells(1,1,boardSize,List())
+
+            // Remove the hit cells
+            val tempCells: List[Cell] = boardCells diff hits
+
+            // Remove the missed cells
+            val availableCells: List[Cell] = tempCells diff miss
+
+            // Chose a random cell among the available cells
+            val randomIndex: Int = Random.nextInt(availableCells.length-1)+1
+            val cellShot: Cell = availableCells(randomIndex).copy()
+            // Get the X and Y values
+            val posX: Int = cellShot.getPosX()
+            val posY: Int = cellShot.getPosY()
+
+
+            return (posX, posY)
+        }
+
+        // Hard AI player
+        else{
+
+
+
+            // getCellsNeighbours
+
+            val posX: Int = Random.nextInt(Game.boardSize-1)+1
+            val posY: Int = Random.nextInt(Game.boardSize-1)+1
+
+            return (posX, posY)
+
+        }
+
+
+    }
+
 }
 
 object Player{
 
     //Get all the cells of a fleet
     def getFleetCells(fleet: List[Ship]): List[Cell] = fleet.flatMap(x => x.getCells())
+
+
 
     /**
      * Ask the position of the cell the player wants to shoot.
@@ -166,13 +241,12 @@ object Player{
     def shoot(shooter: Player, opponent: Player): (Player, Player) = {
 
         val aiLevel: Int = shooter.getAiLevel()
-        //Get X position for the cell to shoot
-        GameUtils.promptShootCell("posX")
-        val posX: Int = GameUtils.getUserInput().toInt
 
-        //Get Y position for the cell to shoot
-        GameUtils.promptShootCell("posY")
-        val posY: Int = GameUtils.getUserInput().toInt
+        val shootPosition: (Int, Int) = shooter.getShootPosition()
+
+        val posX: Int = shootPosition._1
+        val posY: Int = shootPosition._2
+
 
         val shotCell: Cell = new Cell(posX, posY)
 
@@ -182,10 +256,15 @@ object Player{
             return shoot(shooter, opponent)
         }
 
-        if (shooter.alreadyShot(shotCell)){
-            print("\nYou already shot this position. Please enter another position.\n")
-            return shoot(shooter, opponent)
+        // Easy AI player can shoot several times the same position
+        if (aiLevel != 1) {
+            // Checks if the player already shot this position
+            if (shooter.alreadyShot(shotCell)){
+                print("\nYou already shot this position. Please enter another position.\n")
+                return shoot(shooter, opponent)
+            }
         }
+
 
         val opponentShot: Player = opponent.copy()
 
