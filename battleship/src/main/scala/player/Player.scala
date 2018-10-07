@@ -6,7 +6,7 @@ import scala.util.Random
 import elements._
 import game._
 
-case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell], wins: Int = 0){
+case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell], lastShot: Cell = Cell(0,0), wins: Int = 0){
 
     def getNum(): Int = this.num
     def getAiLevel(): Int = this.aiLevel
@@ -14,6 +14,7 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
     def getName(): String = "Player" + this.num
     def getHits(): List[Cell] = this.hits
     def getMiss(): List[Cell] = this.miss
+    def getLastShot(): Cell = this.lastShot
     def getWins(): Int = this.wins
 
 
@@ -153,7 +154,7 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
     }
 
     // Get the position of the shoot depending on the AI level
-    def getShootPosition(): (Int, Int) = {
+    def getShootPosition(lastShot: Cell): (Int, Int) = {
 
         val aiLevel: Int = this.aiLevel
         val hits: List[Cell] = this.hits
@@ -210,14 +211,46 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
         // Hard AI player
         else{
 
+            // Retrieve all the cells of the board
+            val boardCells: List[Cell] = Game.getBoardCells(1,1,Game.boardSize,List())
+
+            // Remove the hit cells
+            val tempCells: List[Cell] = boardCells diff hits
+
+            // Remove the missed cells
+            val availableCells: List[Cell] = tempCells diff miss
+
+            // Retrieve the cells next to the last shot which are available
+            val availableNeighbours: List[Cell] = lastShot.getCellsNeighbours(availableCells)
+
+            // If the last shot was a hit, the AI will try to shoot a cell next to this last shot
+            if (hits.contains(lastShot) && availableNeighbours.isEmpty == false){
+                
+                    // Chose a random cell among the available neighbours
+                    val randomIndex: Int = Random.nextInt(availableNeighbours.length-1)+1
+                    val cellShot: Cell = availableNeighbours(randomIndex).copy()
+
+                    // Get the X and Y values
+                    val posX: Int = cellShot.getPosX()
+                    val posY: Int = cellShot.getPosY()
 
 
-            // getCellsNeighbours
+                    return (posX, posY)
 
-            val posX: Int = Random.nextInt(Game.boardSize-1)+1
-            val posY: Int = Random.nextInt(Game.boardSize-1)+1
+            }
 
-            return (posX, posY)
+            else {
+                // Chose a random cell among the available cells
+                val randomIndex: Int = Random.nextInt(availableCells.length-1)+1
+                val cellShot: Cell = availableCells(randomIndex).copy()
+
+                // Get the X and Y values
+                val posX: Int = cellShot.getPosX()
+                val posY: Int = cellShot.getPosY()
+
+                return (posX, posY)
+            }
+
 
         }
 
@@ -242,7 +275,9 @@ object Player{
 
         val aiLevel: Int = shooter.getAiLevel()
 
-        val shootPosition: (Int, Int) = shooter.getShootPosition()
+        val lastShot: Cell = shooter.getLastShot()
+
+        val shootPosition: (Int, Int) = shooter.getShootPosition(lastShot)
 
         val posX: Int = shootPosition._1
         val posY: Int = shootPosition._2
@@ -265,6 +300,7 @@ object Player{
             }
         }
 
+        val shooterAfterShot: Player = shooter.copy(lastShot=lastShot)
 
         val opponentShot: Player = opponent.copy()
 
@@ -276,9 +312,9 @@ object Player{
             print("\nShip hit!\n\n")
 
             //Register the shot in the hit list
-            val newHit: List[Cell] = shotCell :: shooter.getHits()
+            val newHit: List[Cell] = shotCell :: shooterAfterShot.getHits()
 
-            val shooterUpdated: Player = shooter.copy(hits=newHit)
+            val shooterUpdated: Player = shooterAfterShot.copy(hits=newHit)
 
             // Create a new ship with the hit cell updated
             val updatedCells: List[Cell] = ship.getCells().map((cell) => Cell.hitCell(shotCell, cell))
