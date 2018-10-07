@@ -1,33 +1,70 @@
 package player
 
 import scala.collection.immutable
+import scala.io.StdIn.readLine
+import scala.util.Random
 import elements._
 import game._
 
-case class Player(num: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell]){
+case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell]){
 
     def getNum(): Int = this.num
+    def getAiLevel(): Int = this.aiLevel
     def getFleet(): List[Ship] = this.fleet
     def getName(): String = "Player" + this.num
     def getHits(): List[Cell] = this.hits
     def getMiss(): List[Cell] = this.miss
 
 
+    def askShipPosition(aiLevel: Int, boardSize: Int, numShip: Int): (Int, Int, String) = {
+
+        // If the player is human, ask for entering his fleet
+        if (aiLevel == 0){
+            //Get X position for the initial cell of the ship
+            GameUtils.promptShipInitCell("posX", numShip)
+            val posX: Int = GameUtils.getUserInput().toInt
+
+            //Get Y position for the initial cell of the ship
+            GameUtils.promptShipInitCell("posY", numShip)
+            val posY: Int = GameUtils.getUserInput().toInt
+
+            //Get orientation of the ship
+            GameUtils.promptShipOrientation()
+            val orientation: String = GameUtils.getUserInput()
+
+            return (posX, posY, orientation)
+        }
+
+        // If the player is an AI
+        else {
+            //Get X position for the initial cell of the ship
+            val posX: Int = Random.nextInt(boardSize)
+
+            //Get Y position for the initial cell of the ship
+            val posY: Int = Random.nextInt(boardSize)
+
+            //Get orientation of the ship
+            val orientations: List[String] = List("L","R","U","D")
+            val randomIndex: Int = Random.nextInt(orientations.length)
+            val orientation: String = orientations(randomIndex)
+
+            return (posX, posY, orientation)
+
+        }
+    }
+
+
     def addShips(fleet: List[Ship], numShip: Int, shipSize: Int, boardSize: Int): List[Ship] = {
+
+            val aiLevel: Int = this.getAiLevel()
 
             if (numShip <= 5) {
 
-                //Get X position for the initial cell of the ship
-                GameUtils.promptShipInitCell("posX", numShip)
-                val posX: Int = GameUtils.getUserInput().toInt
+                val shipPosition: (Int, Int, String) = askShipPosition(aiLevel, boardSize, numShip)
 
-                //Get Y position for the initial cell of the ship
-                GameUtils.promptShipInitCell("posY", numShip)
-                val posY: Int = GameUtils.getUserInput().toInt
-
-                //Get orientation of the ship
-                GameUtils.promptShipOrientation()
-                val orientation: String = GameUtils.getUserInput()
+                val posX: Int = shipPosition._1
+                val posY: Int = shipPosition._2
+                val orientation: String = shipPosition._3
 
                 val listCells: List[Cell] = List[Cell]()
 
@@ -128,6 +165,7 @@ object Player{
      */
     def shoot(shooter: Player, opponent: Player): (Player, Player) = {
 
+        val aiLevel: Int = shooter.getAiLevel()
         //Get X position for the cell to shoot
         GameUtils.promptShootCell("posX")
         val posX: Int = GameUtils.getUserInput().toInt
@@ -198,7 +236,7 @@ object Player{
             return (shooterUpdated, opponent)
 
 
-    }
+    }//endShoot
 
 
 }
