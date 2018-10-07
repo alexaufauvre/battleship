@@ -39,11 +39,11 @@ case class Player(num: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell
 
                 //If the ship is inside the board
                 if (newShip.shipInBoard(boardSize) == false){
-                    print("Ship out of the board. Please enter valid values.")
+                    print("\nShip out of the board. Please enter valid values.\n")
                     addShips(fleet, numShip, shipSize, boardSize)
                 }
                 else if(newShip.positionAvailable(fleet) == false){
-                    print("A ship is already at this position. Please enter valid values.")
+                    print("\nA ship is already at this position. Please enter valid values.\n")
                     addShips(fleet, numShip, shipSize, boardSize)
                 }
 
@@ -99,30 +99,19 @@ case class Player(num: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell
             else print("|_ _")
 
             renderBoard(x+1, y, boardSize, fleet, hits, miss)
-
-            /*
-            //Check if the cell is in a ship. True: print the ship's number. False: print a blank cell.
-            var isInShip: Boolean = false
-            fleet.foreach{ship=>
-                if (Ship.checkIfInShip(cell, ship)){
-                    val numShip: Int = ship.getNum()
-                    isInShip = true
-                    println("| " + numShip)
-                }
-            }
-            if (isInShip == false){
-                println("|  ")
-            }
-*/
-
             }
         }//endRenderBoard
 
 
 
-
+    //Checks if the fleet of the player is sunk
     def fleetIsSunk(): Boolean = {
         this.fleet.filter((ship) => Ship.isSunk(ship) == false).length == 0
+    }
+
+    // Checks if the player already shot in this position
+    def alreadyShot(shotCell: Cell): Boolean = {
+        this.getHits().contains(shotCell) || this.getMiss().contains(shotCell)
     }
 
 }
@@ -134,8 +123,8 @@ object Player{
 
     /**
      * Ask the position of the cell the player wants to shoot.
-     * Checks if there's a ship on this cell.
-     * Returns the player who has been shot updated.
+     * Checks if the shot is valid.
+     * Returns both players updated.
      */
     def shoot(shooter: Player, opponent: Player): (Player, Player) = {
 
@@ -149,14 +138,25 @@ object Player{
 
         val shotCell: Cell = new Cell(posX, posY)
 
+        //Checks if the shot is valid
+        if (shotCell.cellInBoard(Game.boardSize) == false){
+            print("\nCell out of the board. Please enter valid values.\n")
+            return shoot(shooter, opponent)
+        }
+
+        if (shooter.alreadyShot(shotCell)){
+            print("\nYou already shot this position. Please enter another position.\n")
+            return shoot(shooter, opponent)
+        }
+
         val opponentShot: Player = opponent.copy()
 
         val fleetShot: List[Ship] = opponentShot.getFleet()
 
-        // fleetShot.map((ship) => cellShot.checkIfInShip(ship))
+        // Checks if the shot hit a ship
         fleetShot.foreach((ship) => if (shotCell.checkIfInShip(ship)){
 
-            print("\nShip hit!\n")
+            print("\nShip hit!\n\n")
 
             //Register the shot in the hit list
             val newHit: List[Cell] = shotCell :: shooter.getHits()
@@ -164,7 +164,6 @@ object Player{
             val shooterUpdated: Player = shooter.copy(hits=newHit)
 
             // Create a new ship with the hit cell updated
-            // val updatedShip: Ship = ship.getCells().foreach((cell) => Cell.hitCell(shotCell, cell))
             val updatedCells: List[Cell] = ship.getCells().map((cell) => Cell.hitCell(shotCell, cell))
 
             //Ship with the cell marked as touched
@@ -172,7 +171,7 @@ object Player{
 
             //Display a message if the ship is sunk
             if (Ship.isSunk(updatedShip)) {
-                print("The ship " + updatedShip.getNum() + " is sunk!")
+                print("\nThe ship " + updatedShip.getNum() + " is sunk!\n")
             }
 
             // Create a temporary fleet without the old version of the ship
@@ -189,7 +188,7 @@ object Player{
 
            }
        )
-            print("\nWater...\n")
+            print("\nWater...\n\n")
 
             //Register the shot in the miss list
             val newMiss: List[Cell] = shotCell :: shooter.getMiss()

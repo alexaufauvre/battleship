@@ -56,14 +56,18 @@ object Ship{
                 fillShip(posX, posY+1, "D", size-1, newListCells)
 
             }
-            // case _ => {
-            //     println("Please chose a correct orientation\n")
-            //     fillShip(posX, posY, orientation, size, listCells)
-            // }
+            case _ => {
+                println("Please chose a correct orientation\n")
+                //Get orientation of the ship
+                GameUtils.promptShipOrientation()
+                val newOrientation: String = GameUtils.getUserInput()
+                fillShip(posX, posY, newOrientation, size, listCells)
+            }
         }
     }
     }
 
+    // Check if the ship is sunk.(All his cells are touched)
     def isSunk(ship: Ship): Boolean = {
         val shipCells: List[Cell] = ship.getCells()
         if (shipCells.filter(_.isTouched() == false).length == 0){

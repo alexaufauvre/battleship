@@ -15,12 +15,12 @@ object Game extends App {
             //Create Player 1's fleet
             println("\nPlayer 1 \n")
             //addShips(fleet, number of the first ship, size of the first ship, size of the board)
-            val fleetPlayer1 = player1.addShips(List(),4,5,10)
+            val fleetPlayer1 = player1.addShips(List(),1,5,10)
 
             //Create Player 2's fleet
             println("\nPlayer 2 \n")
             //addShips(fleet, number of the first ship, size of the first ship, size of the board)
-            val fleetPlayer2 = player2.addShips(List(),4,5,10)
+            val fleetPlayer2 = player2.addShips(List(),1,5,10)
 
             val initPlayer1: Player = player1.copy(fleet=fleetPlayer1)
             val initPlayer2: Player = player2.copy(fleet=fleetPlayer2)
@@ -45,6 +45,7 @@ object Game extends App {
             val boardSize: Int = this.boardSize
             val fleetPlayer1: List[Ship] = player1.getFleet()
 
+            print("\n" + player1.getName() + "'s turn\n\n")
             // Render players' hit board
             print("Hit board : \n")
             player1.renderBoard(1, 1, boardSize, List(), hitsP1, missP1)
@@ -55,7 +56,7 @@ object Game extends App {
             player1.renderBoard(1, 1, boardSize, fleetPlayer1, hitsP2, missP2)
             print("\n")
 
-            // Player 1 shoot on Player 2
+            // Player 1 shoots on Player 2
             val playersUpdated = Player.shoot(player1, player2)
 
             val player1Updated: Player = playersUpdated._1
@@ -72,40 +73,13 @@ object Game extends App {
     }
         // TO DO : Game settings //
 
-
+        def main(): Unit = {
         val initPlayers: (Player, Player) = initializationGame(player1, player2)
         playTurn(initPlayers._1, initPlayers._2)
+    }
 
-        // val cell1: Cell = new Cell(3,4)
-        // val cell2: Cell = new Cell(2,2)
-        // val cell3: Cell = new Cell(12,2)
-        // val ship1: Ship = fleetPlayer1.head
-        // val ship2: Ship = fleetPlayer2.head
-        // val fleetCells: List[List[Cell]] = fleetPlayer1.map(x => x.cells)
+    this.main()
 
-        // print("\n In the board :" + cell1.cellInBoard(10))
-        // print("\n In the board :" + cell3.cellInBoard(10))
-        // print("\n In the board :" + ship1.shipInBoard(10))
-        // print("\n In the board :" + ship2.shipInBoard(10))
-
-
-        // // Return the num of the ship which contains the cell
-        // val shipTest: Int = fleetPlayer1.filter(ship => Ship.checkIfInShip(cell1,ship)).head.getNum
-
-
-
-        //For testing purpose
-        // print("fleetPlayer1 : " + player1.fleet)
-        // print("\n")
-        // print("fleetPlayer2 : " + fleetPlayer2)
-        // print("\n")
-        // print("checkTrue : " + cell1.checkIfInShip(ship1))
-        // print("\n")
-        // print("checkFalse : " + cell2.checkIfInShip(ship1))
-        // print("\n")
-        // print("fleetCells : " + Player.getFleetCells(fleetPlayer1))
-        // print("\n")
-        // print("shipTest : " + shipTest)
 
 
 }
