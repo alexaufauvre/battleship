@@ -29,6 +29,22 @@ object Game extends App {
 
         }
 
+        // Ask the player if they want to play again
+        def askForNewGame(): Int = {
+            val answers: List[Int] = List(1, 2)
+
+            GameUtils.promptAskNewGame()
+            val newGame: Int = GameUtils.getUserInput().toInt
+
+
+            if (answers.contains(newGame) == false){
+                print("\nAnswer not valid. Please try again.\n")
+                this.askForNewGame()
+            }
+
+            return newGame
+        }
+
         //Ask the user which mode he wants to play to know the aiLevel of each player.
         def gameMode(): (Int, Int) = {
             val levels: List[Int] = List(0, 1, 2, 3)
@@ -145,7 +161,27 @@ object Game extends App {
             val winsUpdated: Int = player1Updated.getWins()+1
             val winner: Player = player1Updated.copy(wins=winsUpdated)
 
-            (winner, player2Updated)
+            //If the player is human, we ask if they want to play again
+            if (levelPlayer1 == 0){
+
+                val newGame: Int = askForNewGame()
+
+                newGame match {
+                    case 1 => {
+
+                        val newPlayer1: Player = winner.copy(fleet=List(), hits=List(), miss=List())
+                        val newPlayer2: Player = player2Updated.copy(fleet=List(), hits=List(), miss=List())
+                        playTurn(newPlayer2, newPlayer1)
+
+                    }
+
+                    case 2 => (winner, player2Updated)
+                }
+
+            }
+
+        else (winner, player2Updated)
+
 
         }
     }
