@@ -97,13 +97,22 @@ object Game extends App {
 
         def initializationGame(player1: Player, player2: Player): (Player, Player) = {
 
+            val levelPlayer1: Int = player1.getAiLevel()
+            val levelPlayer2: Int = player2.getAiLevel()
+
+            if (levelPlayer1 == 0){
+                println("\nPlayer 1 \n")
+
+            }
             //Create Player 1's fleet
-            println("\nPlayer 1 \n")
             //addShips(fleet, number of the first ship, size of the first ship, size of the board)
             val fleetPlayer1 = player1.addShips(List(),1,5,10)
 
+            if (levelPlayer2 == 0){
+                println("\nPlayer 2 \n")
+
+            }
             //Create Player 2's fleet
-            println("\nPlayer 2 \n")
             //addShips(fleet, number of the first ship, size of the first ship, size of the board)
             val fleetPlayer2 = player2.addShips(List(),1,5,10)
 
@@ -157,7 +166,10 @@ object Game extends App {
         }
 
         else {
-            print("\nCongratulations, " + player1Updated.getName() + " won!\n")
+            if (levelPlayer1 == 0){
+                print("\nCongratulations, " + player1Updated.getName() + " won!\n")
+
+            }
             val winsUpdated: Int = player1Updated.getWins()+1
             val winner: Player = player1Updated.copy(wins=winsUpdated)
 

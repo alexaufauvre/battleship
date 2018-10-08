@@ -78,11 +78,15 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
 
                 //If the ship is inside the board
                 if (newShip.shipInBoard(boardSize) == false){
-                    print("\nShip out of the board. Please enter valid values.\n")
+                    if (aiLevel == 0){
+                        print("\nShip out of the board. Please enter valid values.\n")
+                    }
                     addShips(fleet, numShip, shipSize, boardSize)
                 }
                 else if(newShip.positionAvailable(fleet) == false){
-                    print("\nA ship is already at this position. Please enter valid values.\n")
+                    if (aiLevel == 0){
+                        print("\nA ship is already at this position. Please enter valid values.\n")
+                    }
                     addShips(fleet, numShip, shipSize, boardSize)
                 }
 
@@ -220,27 +224,50 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
             // Remove the missed cells
             val availableCells: List[Cell] = tempCells diff miss
 
-            // Retrieve the cells next to the last shot which are available
-            val availableNeighbours: List[Cell] = lastShot.getCellsNeighbours(availableCells)
+            if (hits.isEmpty == false){
 
-            // If the last shot was a hit, the AI will try to shoot a cell next to this last shot
-            if (hits.contains(lastShot) && availableNeighbours.isEmpty == false){
+                // Chose a random cell among the hits
+                val randomIndex: Int = Random.nextInt(hits.length)
+                val target: Cell = hits(randomIndex).copy()
 
-                    // Chose a random cell among the available neighbours
-                    val randomIndex: Int = Random.nextInt(availableNeighbours.length-1)+1
-                    val cellShot: Cell = availableNeighbours(randomIndex).copy()
+
+
+                // Retrieve the cells next to the last shot which are available
+                val availableNeighbours: List[Cell] = target.getCellsNeighbours(availableCells)
+
+                // If the last shot was a hit, the AI will try to shoot a cell next to this last shot
+                if (availableNeighbours.isEmpty == false){
+
+                        // Chose a random cell among the available neighbours
+                        val randomIndex: Int = Random.nextInt(availableNeighbours.length)
+                        val cellShot: Cell = availableNeighbours(randomIndex).copy()
+
+                        // Get the X and Y values
+                        val posX: Int = cellShot.getPosX()
+                        val posY: Int = cellShot.getPosY()
+
+
+                        return (posX, posY)
+
+                }
+
+                else{
+                    // Chose a random cell among the available cells (same as Medium AI)
+                    val randomIndex: Int = Random.nextInt(availableCells.length)
+                    val cellShot: Cell = availableCells(randomIndex).copy()
 
                     // Get the X and Y values
                     val posX: Int = cellShot.getPosX()
                     val posY: Int = cellShot.getPosY()
 
-
                     return (posX, posY)
 
+                }
             }
 
+
             else {
-                // Chose a random cell among the available cells
+                // Chose a random cell among the available cells (same as Medium AI)
                 val randomIndex: Int = Random.nextInt(availableCells.length-1)+1
                 val cellShot: Cell = availableCells(randomIndex).copy()
 
@@ -300,7 +327,9 @@ object Player{
             }
         }
 
-        println("\n" + shooter.getName() + " shot in (" + posX +", " + posY + ")\n")
+        if (aiLevel == 0){
+            println("\n" + shooter.getName() + " shot in (" + posX +", " + posY + ")\n")
+        }
 
         val shooterAfterShot: Player = shooter.copy(lastShot=lastShot)
 
@@ -311,7 +340,9 @@ object Player{
         // Checks if the shot hit a ship
         fleetShot.foreach((ship) => if (shotCell.checkIfInShip(ship)){
 
-            print("\nShip hit!\n\n")
+            if (aiLevel == 0){
+                print("\nShip hit!\n\n")
+            }
 
             //Register the shot in the hit list
             val newHit: List[Cell] = shotCell :: shooterAfterShot.getHits()
@@ -325,7 +356,7 @@ object Player{
             val updatedShip: Ship = ship.copy(cells=updatedCells)
 
             //Display a message if the ship is sunk
-            if (Ship.isSunk(updatedShip)) {
+            if (Ship.isSunk(updatedShip) && aiLevel == 0) {
                 print("\nThe ship " + updatedShip.getNum() + " is sunk!\n")
             }
 
@@ -343,7 +374,9 @@ object Player{
 
            }
        )
-            print("\nWater...\n\n")
+            if (aiLevel == 0){
+                print("\nWater...\n\n")
+            }
 
             //Register the shot in the miss list
             val newMiss: List[Cell] = shotCell :: shooter.getMiss()
