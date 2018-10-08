@@ -1,5 +1,9 @@
 package game
 
+import java.io.{BufferedWriter, FileWriter}
+import au.com.bytecode.opencsv.CSVWriter
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 import scala.collection.immutable
 import player._
 import elements._
@@ -48,7 +52,7 @@ object Game extends App {
         //Ask the user which mode he wants to play to know the aiLevel of each player.
         def gameMode(): (Int, Int) = {
             val levels: List[Int] = List(0, 1, 2, 3)
-            val modes: List[Int] = List(1, 2, 3)
+            val modes: List[Int] = List(1, 2, 3, 4)
 
             // Get the game mode
             GameUtils.promptGameMode()
@@ -89,6 +93,12 @@ object Game extends App {
 
                 }
 
+                case 4 => {
+                    // TO DO : Fix the return in this case to end the program.
+                    generalAiContest()
+                    (4,4)
+                }
+
 
             }
 
@@ -96,25 +106,19 @@ object Game extends App {
 
 
         def initializationGame(player1: Player, player2: Player): (Player, Player) = {
-
             val levelPlayer1: Int = player1.getAiLevel()
             val levelPlayer2: Int = player2.getAiLevel()
 
-            if (levelPlayer1 == 0){
-                println("\nPlayer 1 \n")
 
-            }
             //Create Player 1's fleet
+            println("\nPlayer 1 \n")
             //addShips(fleet, number of the first ship, size of the first ship, size of the board)
-            val fleetPlayer1 = player1.addShips(List(),1,5,10)
+            val fleetPlayer1 = player1.addShips(List(),4,2,10)
 
-            if (levelPlayer2 == 0){
-                println("\nPlayer 2 \n")
-
-            }
             //Create Player 2's fleet
+            println("\nPlayer 2 \n")
             //addShips(fleet, number of the first ship, size of the first ship, size of the board)
-            val fleetPlayer2 = player2.addShips(List(),1,5,10)
+            val fleetPlayer2 = player2.addShips(List(),4,2,10)
 
             val initPlayer1: Player = player1.copy(fleet=fleetPlayer1)
             val initPlayer2: Player = player2.copy(fleet=fleetPlayer2)
@@ -166,10 +170,7 @@ object Game extends App {
         }
 
         else {
-            if (levelPlayer1 == 0){
-                print("\nCongratulations, " + player1Updated.getName() + " won!\n")
-
-            }
+            print("\nCongratulations, " + player1Updated.getName() + " won!\n")
             val winsUpdated: Int = player1Updated.getWins()+1
             val winner: Player = player1Updated.copy(wins=winsUpdated)
 
@@ -198,7 +199,8 @@ object Game extends App {
         }
     }
 
-    def aiContest(player1: Player, player2: Player, sizeContest: Int): Unit = {
+    // Runs a loop of games between 2 AI. Returns the two players with their score updated.
+    def aiContest(player1: Player, player2: Player, sizeContest: Int): (Player, Player) = {
 
         // If the contest isn't over
         if (sizeContest != 0){
@@ -216,9 +218,54 @@ object Game extends App {
         }
 
         else {
-            println("AI Level : " + player1.getAiLevel() + ", Wins : " + player1.getWins())
-            println("AI Level : " + player2.getAiLevel() + ", Wins : " + player2.getWins())
+            val levelPlayer1: Int = player1.getAiLevel()
+            val levelPlayer2: Int = player2.getAiLevel()
+            val winsPlayer1: Int = player1.getWins()
+            val winsPlayer2: Int = player2.getWins()
+
+            println("AI Level : " + levelPlayer1 + ", Wins : " + winsPlayer1)
+            println("AI Level : " + levelPlayer2 + ", Wins : " + winsPlayer2)
+
+            (player1, player2)
         }
+    }
+
+    def generalAiContest(): Unit = {
+        val sizeContest: Int = this.sizeContest
+
+        // Create the 3 AI players
+        val easyAI: Player = new Player(1, 1, List(), List(), List())
+        val mediumAI: Player = new Player(2, 2, List(), List(), List())
+        val hardAI: Player = new Player(3, 3, List(), List(), List())
+
+        // Do the contests between the players
+        val easyVsMedium: (Player, Player) = aiContest(easyAI, mediumAI, sizeContest)
+        val easyVsHard: (Player, Player) = aiContest(easyAI, hardAI, sizeContest)
+        val mediumVsHard: (Player, Player) = aiContest(mediumAI, hardAI, sizeContest)
+
+        // Preparing the lines for writing in the CSV file
+        val newLine1: String =  easyVsMedium._1.getAiLevel() + ";" + easyVsMedium._1.getWins() + ";" + easyVsMedium._2.getAiLevel() + ";" + easyVsMedium._2.getWins() + "\n"
+        val newLine2: String =  easyVsHard._1.getAiLevel() + ";" + easyVsHard._1.getWins() + ";" + easyVsHard._2.getAiLevel() + ";" + easyVsHard._2.getWins() + "\n"
+        val newLine3: String =  mediumVsHard._1.getAiLevel() + ";" + mediumVsHard._1.getWins() + ";" + mediumVsHard._2.getAiLevel() + ";" + mediumVsHard._2.getWins() + "\n"
+
+        GameUtils.promptGeneralAiContest()
+
+        writeCSV(newLine1, newLine2, newLine3)
+
+
+
+    }
+
+    def writeCSV(line1: String, line2: String, line3: String): Unit = {
+        val outputFile = new BufferedWriter(new FileWriter("../ai_proof.csv"))
+        val csvWriter = new CSVWriter(outputFile)
+
+        outputFile.write("AI Name; score; AI Name2; score2\n")
+        outputFile.write(line1)
+        outputFile.write(line2)
+        outputFile.write(line3)
+
+        outputFile.close();
     }
         // TO DO : Game settings //
 
@@ -230,8 +277,13 @@ object Game extends App {
         val player1 = new Player(1, levelPlayer1, List(), List(), List())
         val player2 = new Player(2, levelPlayer2, List(), List(), List())
 
+        if (levelPlayer1 == 4 && levelPlayer2 == 4){
+
+        }
+
+
         // If it's a contest
-        if (levelPlayer1 != 0 && levelPlayer2 != 0){
+        else if (levelPlayer1 != 0 && levelPlayer1 <= 3 && levelPlayer2 != 0 && levelPlayer2 <= 3){
             aiContest(player1, player2, this.sizeContest)
         }
         else{

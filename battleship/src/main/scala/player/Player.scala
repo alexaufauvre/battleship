@@ -230,8 +230,6 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
                 val randomIndex: Int = Random.nextInt(hits.length)
                 val target: Cell = hits(randomIndex).copy()
 
-
-
                 // Retrieve the cells next to the last shot which are available
                 val availableNeighbours: List[Cell] = target.getCellsNeighbours(availableCells)
 
@@ -327,9 +325,7 @@ object Player{
             }
         }
 
-        if (aiLevel == 0){
-            println("\n" + shooter.getName() + " shot in (" + posX +", " + posY + ")\n")
-        }
+        println("\n" + shooter.getName() + " shot in (" + posX +", " + posY + ")\n")
 
         val shooterAfterShot: Player = shooter.copy(lastShot=lastShot)
 
@@ -340,9 +336,7 @@ object Player{
         // Checks if the shot hit a ship
         fleetShot.foreach((ship) => if (shotCell.checkIfInShip(ship)){
 
-            if (aiLevel == 0){
-                print("\nShip hit!\n\n")
-            }
+            print("\nShip hit!\n\n")
 
             //Register the shot in the hit list
             val newHit: List[Cell] = shotCell :: shooterAfterShot.getHits()
@@ -356,7 +350,7 @@ object Player{
             val updatedShip: Ship = ship.copy(cells=updatedCells)
 
             //Display a message if the ship is sunk
-            if (Ship.isSunk(updatedShip) && aiLevel == 0) {
+            if (Ship.isSunk(updatedShip)) {
                 print("\nThe ship " + updatedShip.getNum() + " is sunk!\n")
             }
 
@@ -374,9 +368,7 @@ object Player{
 
            }
        )
-            if (aiLevel == 0){
-                print("\nWater...\n\n")
-            }
+            print("\nWater...\n\n")
 
             //Register the shot in the miss list
             val newMiss: List[Cell] = shotCell :: shooter.getMiss()
