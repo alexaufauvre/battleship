@@ -1,33 +1,72 @@
 package player
 
 import scala.collection.immutable
+import scala.io.StdIn.readLine
+import scala.util.Random
 import elements._
 import game._
 
-case class Player(num: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell]){
+case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell], lastShot: Cell = Cell(0,0), wins: Int = 0){
 
     def getNum(): Int = this.num
+    def getAiLevel(): Int = this.aiLevel
     def getFleet(): List[Ship] = this.fleet
     def getName(): String = "Player" + this.num
     def getHits(): List[Cell] = this.hits
     def getMiss(): List[Cell] = this.miss
+    def getLastShot(): Cell = this.lastShot
+    def getWins(): Int = this.wins
+
+
+    def getShipPosition(aiLevel: Int, boardSize: Int, numShip: Int): (Int, Int, String) = {
+
+        // If the player is human, ask for entering his fleet
+        if (aiLevel == 0){
+            //Get X position for the initial cell of the ship
+            GameUtils.promptShipInitCell("posX", numShip)
+            val posX: Int = GameUtils.getUserInput().toInt
+
+            //Get Y position for the initial cell of the ship
+            GameUtils.promptShipInitCell("posY", numShip)
+            val posY: Int = GameUtils.getUserInput().toInt
+
+            //Get orientation of the ship
+            GameUtils.promptShipOrientation()
+            val orientation: String = GameUtils.getUserInput()
+
+            return (posX, posY, orientation)
+        }
+
+        // If the player is an AI
+        else {
+            //Get X position for the initial cell of the ship
+            val posX: Int = Random.nextInt(boardSize-1)+1
+
+            //Get Y position for the initial cell of the ship
+            val posY: Int = Random.nextInt(boardSize-1)+1
+
+            //Get orientation of the ship
+            val orientations: List[String] = List("L","R","U","D")
+            val randomIndex: Int = Random.nextInt(orientations.length)
+            val orientation: String = orientations(randomIndex)
+
+            return (posX, posY, orientation)
+
+        }
+    }
 
 
     def addShips(fleet: List[Ship], numShip: Int, shipSize: Int, boardSize: Int): List[Ship] = {
 
+            val aiLevel: Int = this.getAiLevel()
+
             if (numShip <= 5) {
 
-                //Get X position for the initial cell of the ship
-                GameUtils.promptShipInitCell("posX", numShip)
-                val posX: Int = GameUtils.getUserInput().toInt
+                val shipPosition: (Int, Int, String) = getShipPosition(aiLevel, boardSize, numShip)
 
-                //Get Y position for the initial cell of the ship
-                GameUtils.promptShipInitCell("posY", numShip)
-                val posY: Int = GameUtils.getUserInput().toInt
-
-                //Get orientation of the ship
-                GameUtils.promptShipOrientation()
-                val orientation: String = GameUtils.getUserInput()
+                val posX: Int = shipPosition._1
+                val posY: Int = shipPosition._2
+                val orientation: String = shipPosition._3
 
                 val listCells: List[Cell] = List[Cell]()
 
@@ -39,11 +78,15 @@ case class Player(num: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell
 
                 //If the ship is inside the board
                 if (newShip.shipInBoard(boardSize) == false){
-                    print("\nShip out of the board. Please enter valid values.\n")
+                    if (aiLevel == 0){
+                        print("\nShip out of the board. Please enter valid values.\n")
+                    }
                     addShips(fleet, numShip, shipSize, boardSize)
                 }
                 else if(newShip.positionAvailable(fleet) == false){
-                    print("\nA ship is already at this position. Please enter valid values.\n")
+                    if (aiLevel == 0){
+                        print("\nA ship is already at this position. Please enter valid values.\n")
+                    }
                     addShips(fleet, numShip, shipSize, boardSize)
                 }
 
@@ -114,12 +157,139 @@ case class Player(num: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell
         this.getHits().contains(shotCell) || this.getMiss().contains(shotCell)
     }
 
+    // Get the position of the shoot depending on the AI level
+    def getShootPosition(lastShot: Cell): (Int, Int) = {
+
+        val aiLevel: Int = this.aiLevel
+        val hits: List[Cell] = this.hits
+        val miss: List[Cell] = this.miss
+
+        // Human player
+        if (aiLevel == 0){
+            //Get X position for the cell to shoot
+            GameUtils.promptShootCell("posX")
+            val posX: Int = GameUtils.getUserInput().toInt
+
+            //Get Y position for the cell to shoot
+            GameUtils.promptShootCell("posY")
+            val posY: Int = GameUtils.getUserInput().toInt
+
+            return (posX, posY)
+        }
+
+        // Easy AI player
+        else if (aiLevel == 1){
+
+            val posX: Int = Random.nextInt(Game.boardSize-1)+1
+            val posY: Int = Random.nextInt(Game.boardSize-1)+1
+
+            return (posX, posY)
+
+        }
+
+        // Medium AI player
+        else if (aiLevel == 2){
+
+            val boardSize: Int = Game.boardSize
+
+            // Retrieve all the cells of the board
+            val boardCells: List[Cell] = Game.getBoardCells(1,1,boardSize,List())
+
+            // Remove the hit cells
+            val tempCells: List[Cell] = boardCells diff hits
+
+            // Remove the missed cells
+            val availableCells: List[Cell] = tempCells diff miss
+
+            // Chose a random cell among the available cells
+            val randomIndex: Int = Random.nextInt(availableCells.length-1)+1
+            val cellShot: Cell = availableCells(randomIndex).copy()
+            // Get the X and Y values
+            val posX: Int = cellShot.getPosX()
+            val posY: Int = cellShot.getPosY()
+
+
+            return (posX, posY)
+        }
+
+        // Hard AI player
+        else{
+
+            // Retrieve all the cells of the board
+            val boardCells: List[Cell] = Game.getBoardCells(1,1,Game.boardSize,List())
+
+            // Remove the hit cells
+            val tempCells: List[Cell] = boardCells diff hits
+
+            // Remove the missed cells
+            val availableCells: List[Cell] = tempCells diff miss
+
+            if (hits.isEmpty == false){
+
+                // Chose a random cell among the hits
+                val randomIndex: Int = Random.nextInt(hits.length)
+                val target: Cell = hits(randomIndex).copy()
+
+                // Retrieve the cells next to the last shot which are available
+                val availableNeighbours: List[Cell] = target.getCellsNeighbours(availableCells)
+
+                // If the last shot was a hit, the AI will try to shoot a cell next to this last shot
+                if (availableNeighbours.isEmpty == false){
+
+                        // Chose a random cell among the available neighbours
+                        val randomIndex: Int = Random.nextInt(availableNeighbours.length)
+                        val cellShot: Cell = availableNeighbours(randomIndex).copy()
+
+                        // Get the X and Y values
+                        val posX: Int = cellShot.getPosX()
+                        val posY: Int = cellShot.getPosY()
+
+
+                        return (posX, posY)
+
+                }
+
+                else{
+                    // Chose a random cell among the available cells (same as Medium AI)
+                    val randomIndex: Int = Random.nextInt(availableCells.length)
+                    val cellShot: Cell = availableCells(randomIndex).copy()
+
+                    // Get the X and Y values
+                    val posX: Int = cellShot.getPosX()
+                    val posY: Int = cellShot.getPosY()
+
+                    return (posX, posY)
+
+                }
+            }
+
+
+            else {
+                // Chose a random cell among the available cells (same as Medium AI)
+                val randomIndex: Int = Random.nextInt(availableCells.length-1)+1
+                val cellShot: Cell = availableCells(randomIndex).copy()
+
+                // Get the X and Y values
+                val posX: Int = cellShot.getPosX()
+                val posY: Int = cellShot.getPosY()
+
+                return (posX, posY)
+            }
+
+
+        }
+
+
+    }
+
 }
 
 object Player{
 
     //Get all the cells of a fleet
     def getFleetCells(fleet: List[Ship]): List[Cell] = fleet.flatMap(x => x.getCells())
+
+
 
     /**
      * Ask the position of the cell the player wants to shoot.
@@ -128,13 +298,15 @@ object Player{
      */
     def shoot(shooter: Player, opponent: Player): (Player, Player) = {
 
-        //Get X position for the cell to shoot
-        GameUtils.promptShootCell("posX")
-        val posX: Int = GameUtils.getUserInput().toInt
+        val aiLevel: Int = shooter.getAiLevel()
 
-        //Get Y position for the cell to shoot
-        GameUtils.promptShootCell("posY")
-        val posY: Int = GameUtils.getUserInput().toInt
+        val lastShot: Cell = shooter.getLastShot()
+
+        val shootPosition: (Int, Int) = shooter.getShootPosition(lastShot)
+
+        val posX: Int = shootPosition._1
+        val posY: Int = shootPosition._2
+
 
         val shotCell: Cell = new Cell(posX, posY)
 
@@ -144,10 +316,18 @@ object Player{
             return shoot(shooter, opponent)
         }
 
-        if (shooter.alreadyShot(shotCell)){
-            print("\nYou already shot this position. Please enter another position.\n")
-            return shoot(shooter, opponent)
+        // Easy AI player can shoot several times the same position
+        if (aiLevel != 1) {
+            // Checks if the player already shot this position
+            if (shooter.alreadyShot(shotCell)){
+                print("\nYou already shot this position. Please enter another position.\n")
+                return shoot(shooter, opponent)
+            }
         }
+
+        println("\n" + shooter.getName() + " shot in (" + posX +", " + posY + ")\n")
+
+        val shooterAfterShot: Player = shooter.copy(lastShot=lastShot)
 
         val opponentShot: Player = opponent.copy()
 
@@ -159,9 +339,9 @@ object Player{
             print("\nShip hit!\n\n")
 
             //Register the shot in the hit list
-            val newHit: List[Cell] = shotCell :: shooter.getHits()
+            val newHit: List[Cell] = shotCell :: shooterAfterShot.getHits()
 
-            val shooterUpdated: Player = shooter.copy(hits=newHit)
+            val shooterUpdated: Player = shooterAfterShot.copy(hits=newHit)
 
             // Create a new ship with the hit cell updated
             val updatedCells: List[Cell] = ship.getCells().map((cell) => Cell.hitCell(shotCell, cell))
@@ -198,7 +378,7 @@ object Player{
             return (shooterUpdated, opponent)
 
 
-    }
+    }//endShoot
 
 
 }
