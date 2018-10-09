@@ -40,8 +40,8 @@ case class Cell(posX: Int, posY: Int, touched: Boolean = false){
 
     /** Get the cells which are right next to the cell (up, down, left, right).
      *
-     *  @param boardSize the size of the board
-     *  @return true if the cell belongs to the board
+     *  @param boardCells the cells of the board
+     *  @return the list of the cell's neighbours
      */
     def getCellsNeighbours(boardCells: List[Cell]): List[Cell] = {
         val neighboursVertical: List[Cell] = boardCells.filter((cell) => cell.getPosX() == this.getPosX()+1 ||  cell.getPosX() == this.getPosX()-1)
@@ -53,9 +53,13 @@ case class Cell(posX: Int, posY: Int, touched: Boolean = false){
 }
 
 object Cell{
-    /**
-     * @params: shotCell is the cell on which the player has shot. testCell is the cell to test if it's hit or not
-     */
+    
+     /** Tests if the shot cell corresponds to a particular cell
+      *
+      *  @param shotCell the Cell where the player shot
+      *  @param testCell the Cell to test if it corresponds to the shotCell
+      *  @return the test cell, marked as touched if the cell tested is the same as the shot cell.
+      */
     def hitCell(shotCell: Cell, testCell: Cell): Cell = {
         if(shotCell == testCell){
 

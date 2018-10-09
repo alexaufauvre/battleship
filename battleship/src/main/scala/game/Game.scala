@@ -13,6 +13,15 @@ object Game extends App {
         val boardSize: Int = 10
         val sizeContest: Int = 100
 
+
+        /**  Get all the cells of the board
+         *
+         *  @param x the x coord of the current cell
+         *  @param y the y coord of the current cell
+         *  @param boardSize the size of the board
+         *  @param cells the current list of cells of the board
+         *  @return the final list of cells of the board
+         */
         def getBoardCells(x: Int, y: Int, boardSize: Int, cells: List[Cell]): List[Cell] = {
 
                 if(x<=boardSize){
@@ -33,23 +42,39 @@ object Game extends App {
 
         }
 
-        // Ask the player if they want to play again
+        /**  Ask the player if they want to play again
+         *
+         *  @return the answer of the player
+         */
         def askForNewGame(): Int = {
             val answers: List[Int] = List(1, 2)
 
             GameUtils.promptAskNewGame()
-            val newGame: Int = GameUtils.getUserInput().toInt
 
+            val inputNewGame: String = GameUtils.getUserInput()
 
-            if (answers.contains(newGame) == false){
-                print("\nAnswer not valid. Please try again.\n")
-                this.askForNewGame()
+            if (GameUtils.isInt(inputNewGame)){
+                val newGame: Int = inputNewGame.toInt
+                if (answers.contains(newGame) == false){
+                    print("\nAnswer not valid. Please try again.\n")
+                    this.askForNewGame()
+                }
+
+                return newGame
             }
 
-            return newGame
+            else {
+                GameUtils.promptBadValues()
+                askForNewGame()
+            }
         }
 
-        //Ask the user which mode he wants to play to know the aiLevel of each player.
+
+
+        /**  Ask the user which mode he wants to play
+         *
+         *  @return the aiLevel of each player
+         */
         def gameMode(): (Int, Int) = {
             val levels: List[Int] = List(0, 1, 2, 3)
             val modes: List[Int] = List(1, 2, 3, 4)
@@ -94,7 +119,6 @@ object Game extends App {
                 }
 
                 case 4 => {
-                    // TO DO : Fix the return in this case to end the program.
                     generalAiContest()
                     (4,4)
                 }
@@ -105,6 +129,12 @@ object Game extends App {
     }
 
 
+    /**  Initialize the game, create the players and get their fleets
+     *
+     *  @param player1 the first player to participate
+     *  @param player2 the second player to participate
+     *  @return both players updated with their fleets
+     */
         def initializationGame(player1: Player, player2: Player): (Player, Player) = {
             val levelPlayer1: Int = player1.getAiLevel()
             val levelPlayer2: Int = player2.getAiLevel()
@@ -113,12 +143,12 @@ object Game extends App {
             //Create Player 1's fleet
             println("\nPlayer 1 \n")
             //addShips(fleet, number of the first ship, size of the first ship, size of the board)
-            val fleetPlayer1 = player1.addShips(List(),4,2,10)
+            val fleetPlayer1 = player1.addShips(List(),1,5,10)
 
             //Create Player 2's fleet
             println("\nPlayer 2 \n")
             //addShips(fleet, number of the first ship, size of the first ship, size of the board)
-            val fleetPlayer2 = player2.addShips(List(),4,2,10)
+            val fleetPlayer2 = player2.addShips(List(),1,5,10)
 
             val initPlayer1: Player = player1.copy(fleet=fleetPlayer1)
             val initPlayer2: Player = player2.copy(fleet=fleetPlayer2)
@@ -128,7 +158,12 @@ object Game extends App {
         }
 
 
-        // Play one round in the game
+        /**  Play one round in the game
+         *
+         *  @param player1 the shooter
+         *  @param player2 the opponent
+         *  @return both players updated with their fleets, hits, miss
+         */
         def playTurn(player1: Player, player2: Player): (Player, Player) = {
 
             val hitsP1: List[Cell] = player1.getHits()
@@ -199,7 +234,13 @@ object Game extends App {
         }
     }
 
-    // Runs a loop of games between 2 AI. Returns the two players with their score updated.
+    /**  Runs a loop of games between 2 AI. Returns the two players with their score updated.
+     *
+     *  @param player1 the first player to participate
+     *  @param player2 the second player to participate
+     *  @param sizeContest the number of games to play
+     *  @return both players updated
+     */
     def aiContest(player1: Player, player2: Player, sizeContest: Int): (Player, Player) = {
 
         // If the contest isn't over
@@ -230,6 +271,9 @@ object Game extends App {
         }
     }
 
+    /**  Runs a loop of games between every AI
+     *
+     */
     def generalAiContest(): Unit = {
         val sizeContest: Int = this.sizeContest
 
@@ -256,6 +300,12 @@ object Game extends App {
 
     }
 
+    /**  Write lines in a csv file
+     *
+     *  @param line1 the first line to write
+     *  @param line2 the second line to write
+     *  @param line3 the third line to write
+     */
     def writeCSV(line1: String, line2: String, line3: String): Unit = {
         val outputFile = new BufferedWriter(new FileWriter("../ai_proof.csv"))
         val csvWriter = new CSVWriter(outputFile)
@@ -267,8 +317,10 @@ object Game extends App {
 
         outputFile.close();
     }
-        // TO DO : Game settings //
 
+        /**  The main who launches the battleship program
+         *
+         */
         def main(): Unit = {
 
         val gameMode: (Int, Int) = this.gameMode()
