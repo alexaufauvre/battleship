@@ -8,33 +8,93 @@ import game._
 
 case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell], lastShot: Cell = Cell(0,0), wins: Int = 0){
 
+    /** Get the number of the player
+     *
+     *  @return the number of the player
+     */
     def getNum(): Int = this.num
+
+    /** Get the AI level of the player
+     *
+     *  @return the AI level of the player
+     */
     def getAiLevel(): Int = this.aiLevel
+
+    /** Get the fleet of the player
+     *
+     *  @return the fleet of the player
+     */
     def getFleet(): List[Ship] = this.fleet
+
+    /** Get the name of the player
+     *
+     *  @return the name of the player
+     */
     def getName(): String = "Player" + this.num
+
+    /** Get the list of cells the player hit
+     *
+     *  @return the list of cells the player hit
+     */
     def getHits(): List[Cell] = this.hits
+
+    /** Get the list of cells the player missed
+     *
+     *  @return the list of cells the player missed
+     */
     def getMiss(): List[Cell] = this.miss
+
+    /** Get the last shot performed by the player
+     *
+     *  @return the last shot performed by the player
+     */
     def getLastShot(): Cell = this.lastShot
+
+    /** Get the number of wins of the player
+     *
+     *  @return the number of wins of the player
+     */
     def getWins(): Int = this.wins
 
 
+    /**  Get the position of the player's ship
+     *
+     *  @param aiLevel the player's AI level
+     *  @param boardSize the size of the board
+     *  @param numShip the number of the ship
+     *  @return the X of the ship's initial cell, the X of the ship's initial cell, the ship's orientation
+     */
     def getShipPosition(aiLevel: Int, boardSize: Int, numShip: Int): (Int, Int, String) = {
 
         // If the player is human, ask for entering his fleet
         if (aiLevel == 0){
+
             //Get X position for the initial cell of the ship
             GameUtils.promptShipInitCell("posX", numShip)
-            val posX: Int = GameUtils.getUserInput().toInt
+            val inputPosX: String = GameUtils.getUserInput()
 
             //Get Y position for the initial cell of the ship
             GameUtils.promptShipInitCell("posY", numShip)
-            val posY: Int = GameUtils.getUserInput().toInt
+            val inputPosY: String = GameUtils.getUserInput()
 
-            //Get orientation of the ship
-            GameUtils.promptShipOrientation()
-            val orientation: String = GameUtils.getUserInput()
+            if (GameUtils.isInt(inputPosX) && GameUtils.isInt(inputPosY)){
 
-            return (posX, posY, orientation)
+                    val posY: Int = inputPosY.toInt
+                    val posX: Int = inputPosX.toInt
+
+                    //Get orientation of the ship
+                    GameUtils.promptShipOrientation()
+                    val orientation: String = GameUtils.getUserInput()
+
+                    (posX, posY, orientation)
+            }
+            else {
+                GameUtils.promptBadValues()
+                getShipPosition(aiLevel, boardSize, numShip)
+            }
+
+
+
         }
 
         // If the player is an AI
@@ -56,6 +116,14 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
     }
 
 
+    /**  Get the position of the player's ship
+     *
+     *  @param fleet the player's fleet
+     *  @param numShip the number of the ship
+     *  @param shipSize the size of the ship
+     *  @param boardSize the size of the board
+     *  @return the fleet of the player
+     */
     def addShips(fleet: List[Ship], numShip: Int, shipSize: Int, boardSize: Int): List[Ship] = {
 
             val aiLevel: Int = this.getAiLevel()
@@ -104,9 +172,18 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
         else fleet
 
 
-    } //end addShips
+    }
 
-    //Render the board containing our fleet
+
+    /**  Render the board containing our fleet
+     *
+     *  @param x the x coord of the current cell
+     *  @param y the y coord of the current cell
+     *  @param boardSize the size of the board
+     *  @param fleet the fleet of the player
+     *  @param hits the hits of the player
+     *  @param miss the miss of the player
+     */
     def renderBoard(x: Int, y: Int, boardSize: Int, fleet: List[Ship], hits: List[Cell], miss: List[Cell]): Unit = {
 
         // Numbers on bottom
@@ -143,21 +220,31 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
 
             renderBoard(x+1, y, boardSize, fleet, hits, miss)
             }
-        }//endRenderBoard
+        }
 
 
-
-    //Checks if the fleet of the player is sunk
+    /**  Checks if the fleet of the player is sunk
+     *
+     *  @return true if the fleet is sunk
+     */
     def fleetIsSunk(): Boolean = {
         this.fleet.filter((ship) => Ship.isSunk(ship) == false).length == 0
     }
 
-    // Checks if the player already shot in this position
+    /**  Checks if the player already shot in this position
+     *
+     *  @param shotCell the cell to test
+     *  @return true if the cell was already shot
+     */
     def alreadyShot(shotCell: Cell): Boolean = {
         this.getHits().contains(shotCell) || this.getMiss().contains(shotCell)
     }
 
-    // Get the position of the shoot depending on the AI level
+    /**   Get the position of the shoot depending on the AI level
+     *
+     *  @param lastShot the last cell shot by the player
+     *  @return the position of the cell to shoot
+     */
     def getShootPosition(lastShot: Cell): (Int, Int) = {
 
         val aiLevel: Int = this.aiLevel
@@ -166,15 +253,26 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
 
         // Human player
         if (aiLevel == 0){
+
             //Get X position for the cell to shoot
             GameUtils.promptShootCell("posX")
-            val posX: Int = GameUtils.getUserInput().toInt
+            val inputPosX: String = GameUtils.getUserInput()
 
             //Get Y position for the cell to shoot
             GameUtils.promptShootCell("posY")
-            val posY: Int = GameUtils.getUserInput().toInt
+            val inputPosY: String = GameUtils.getUserInput()
 
-            return (posX, posY)
+            if (GameUtils.isInt(inputPosX) && GameUtils.isInt(inputPosY)){
+                val posX: Int = inputPosX.toInt
+                val posY: Int = inputPosY.toInt
+                return (posX, posY)
+            }
+
+            else {
+                GameUtils.promptBadValues()
+                getShootPosition(lastShot)
+            }
+
         }
 
         // Easy AI player
@@ -286,15 +384,21 @@ case class Player(num: Int, aiLevel: Int, fleet: List[Ship], hits: List[Cell], m
 
 object Player{
 
-    //Get all the cells of a fleet
+    /** Get all the cells of a fleet
+     *
+     *  @param fleet the fleet we want the cells
+     *  @return the list of all the cells belonging to the fleet
+     */
     def getFleetCells(fleet: List[Ship]): List[Cell] = fleet.flatMap(x => x.getCells())
 
 
 
     /**
-     * Ask the position of the cell the player wants to shoot.
-     * Checks if the shot is valid.
-     * Returns both players updated.
+     * Ask the position of the cell the player wants to shoot. Checks if the shot is valid.
+     *
+     * @param shooter the player who shoots
+     * @param opponent the player who receive the shot
+     * @return both players updated.
      */
     def shoot(shooter: Player, opponent: Player): (Player, Player) = {
 
@@ -378,7 +482,7 @@ object Player{
             return (shooterUpdated, opponent)
 
 
-    }//endShoot
+    }
 
 
 }
